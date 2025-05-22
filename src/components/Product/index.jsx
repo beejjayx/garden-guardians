@@ -12,7 +12,7 @@ const Conteudo = () => {
   const images = [gnome, gnome2, gnome3, gnome4];
   const [mainImg, setMainImg] = useState(images[0]);
   const [cep, setCep] = useState("");
-  const [, setActions] = useState("");
+  const [size, setSize] = useState("");
   const [endereco, setEndereco] = useState(null);
 
   const variantes = [
@@ -22,36 +22,33 @@ const Conteudo = () => {
     { cor: "Blue", image: gnome4 },
   ];
 
+  const sizes = ["P", "M", "G"];
+
   const handleBlur = async () => {
     const dados = await findCEP(cep);
     if (dados) setEndereco(dados);
   };
 
   const saveActions = (data) => {
-    localStorage.setItem(
-      "userActions",
-      JSON.stringify({ data, timestamp: Date.now() })
-    );
+    const savedData = { ...data, timestamp: Date.now() };
+    localStorage.setItem("userActions", JSON.stringify(savedData));
   };
 
   const getActions = () => {
     const data = JSON.parse(localStorage.getItem("userActions"));
-    return data && (Date.now() - data.timestamp) / 60000 < 15
-      ? data.data
-      : null;
+    return data && (Date.now() - data.timestamp) / 60000 < 15 ? data : null;
   };
-  console.log(getActions());
+
+  console.log("informações salvas: ", getActions());
 
   useEffect(() => {
-    setActions(getActions());
     const savedActions = getActions();
     if (savedActions) {
       setCep(savedActions.cep);
+      setSize(savedActions.size);
 
       const corSelecionada = variantes.find((v) => v.cor === savedActions.cor);
-      if (corSelecionada) {
-        setMainImg(corSelecionada.image);
-      }
+      if (corSelecionada) setMainImg(corSelecionada.image);
     }
   }, []);
 
@@ -116,6 +113,21 @@ const Conteudo = () => {
         <h2 className="text-[20px] line-through  mt-10">de R$ 50,00</h2>
         <h2 className="text-[24px] mb-10">por R$ 49,90 !</h2>
         <div id="thumbnail" className=" w-100">
+          <h2>Escolha um tamanho:</h2>
+          <select
+            className="mb-5 mt-5 border p-2 rounded-md"
+            value={size}
+            onChange={(e) => {
+              setSize(e.target.value);
+              saveActions({ cep, mainImg, size: e.target.value });
+            }}
+          >
+            {sizes.map((sizeOption) => (
+              <option key={sizeOption} value={sizeOption}>
+                {sizeOption}
+              </option>
+            ))}
+          </select>
           <h2>Escolha uma cor:</h2>
           <div className="flex gap-4 justify-center mt-5 mb-10">
             {variantes.map((variante, index) => (
