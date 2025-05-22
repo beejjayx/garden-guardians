@@ -30,7 +30,8 @@ const Conteudo = () => {
   };
 
   const saveActions = (data) => {
-    const savedData = { ...data, timestamp: Date.now() };
+    const previousData = getActions() || {};
+    const savedData = { ...previousData, ...data, timestamp: Date.now() };
     localStorage.setItem("userActions", JSON.stringify(savedData));
   };
 
